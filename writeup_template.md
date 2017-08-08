@@ -1,7 +1,5 @@
-## Writeup Template
+# Advanced Lane Finding Project
 ---
-
-**Advanced Lane Finding Project**
 
 The goals / steps of this project are the following:
 
@@ -37,37 +35,27 @@ The goals / steps of this project are the following:
 [test1processed]: ./examples/test_1_processed.png "Image after pipeline"
 [test1histogram]: ./examples/test_1_histogram.png "Histogram for line lane finding"
 [test1lanesdetected]: ./examples/test_1_lanes_detected.png "Left and right lanes found"
-
-## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
-
-### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
+[test1endresults]: ./examples/test_1_endresults.png "Lane detected"
+[test1visualizedfit]: ./examples/test_1_visualizedfit.png "visualized fit"
 
 ---
 
-### Writeup / README
+## Camera Calibration
 
-#### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  [Here](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) is a template writeup for this project you can use as a guide and a starting point.  
-
-You're reading it!
-
-### Camera Calibration
-
-#### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
+#### Briefly state how you computed the camera matrix and distortion coefficients. 
 
 The code for this step is contained in the first code cell of the IPython notebook located in "lane_lines.ipynb"
 
-I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  
+I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  The objpoints and imgpoints can be obtained by using the `compute_cal_points` function in the very first cell.
 
-I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result: 
+I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function.  The result can be seen below in the discussion of the pipeline used for processing the images.
 
-![alt text][image1]
+## Pipeline
 
-### Pipeline (single images)
-
-The entire pipeline consists of the following:
-	- correcting a distorted image
-	- performing binary thresholding
-	- perspective transform
+The entire pipeline for processing images consists of the following:
+* correcting a distorted image
+* performing binary thresholding
+* perspective transform
 
 I decided to use a combination of gradients and color transforms to achieve a threshold binary image.  I used the direction gradient, the magnitude gradient, the absolute x gradient, and the s channel in the hls color space.
 
@@ -91,12 +79,12 @@ I decided to use a combination of gradients and color transforms to achieve a th
 #### S channel
 ![alt text][test1sbinary]
 
-### And finally, here is the combined binary image
+#### And finally, here is the combined binary image
 ![alt text][test1combinedbinary]
 
-#### Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
+## Perspective transform 
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
+The code for my perspective transform includes a function called `corners_unwarp(image, mtx, dist)`.  Here I use `cv2.getPerspectiveTransform` and `cv2.warpPerspective` to get a bird's eye view of the road.  The source and destination points were hard coded and taken from the Udacity Slack Channel.
 
 ```python
     # Points were found on the Udacity Slack Channel by Chris Grill
@@ -109,15 +97,18 @@ The code for my perspective transform includes a function called `warper()`, whi
 #### Here is the image after the perspective transform
 ![alt text][test1warped]
 
-
-#### Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
+## Identification of lane-lines
 
 #### Here is the image after the entire pipeline
 ![alt text][test1processed]
 
 At this point, we want to determine the pixels that make up the left and right line lanes.  After that we also want to fit a curve to these lines.
 
-One of these methods makes use of a histogram.  We use a histogram to determine the peaks on the left and right side of the midpoint.  We then use a sliding window to get all the points.  This can all be seen under the fit_lines(img, histogram) function under "Detecting the left and right lanes" in the lane_lines.ipynb
+One of these methods makes use of a histogram.  We use a histogram to determine the peaks on the left and right side of the midpoint.  This is also done with the bottom half of the image.  We then use a sliding window to get all the points in the lane-lines.  This can all be seen under the fit_lines(img, histogram) function under "Detecting the left and right lanes" in the lane_lines.ipynb.  Once we have enough points, we can fit a 2nd degree polynomial to the lines.
+
+Once we know where the lines are, we do not need to start over and perform a blind search with a histogram.  We can instead search around in a margin around the previous line position.  This can be seen in `fit_lines-from_prev` in the notebook.
+
+A Line class is also used to keep track of the past n fits.  In this case, I chose to use 10 for n.  This smooths out the area of interest because we are using an average of the previous fits.  If we cannot find enough pixels, then we should have a good enough history to keep going on the lane, but at this point we would restart with the histogram method.  
 
 #### Histogram of peaks
 ![alt text][test1histogram]
@@ -125,7 +116,11 @@ One of these methods makes use of a histogram.  We use a histogram to determine 
 #### Visual of the lines and identified pixels
 ![alt text][test1lanesdetected]
 
-#### Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
+#### Visual of the search from a previously identified line
+![alt text][test1visualizedfit]
+
+
+## Radius of curvature of the lane and the position of the vehicle
 
 The code for calculating curvatures is in a function called calculate_curvatures under the section "Calculating left and right curvatures" in the lane_lines.ipynb
 The code was essentially provided by Udacity, but I will briefly discuss the calculations.  The function takes in 
@@ -145,22 +140,22 @@ Under the same section, you will see `distance_from_lane_center(img, left_fit, r
 
 For this, we use the center of the image as our camera position, and we want to find out the distance from our camera position to the center of the lane.  The center of the lane is the midpoint of the two lane lines at the very bottom of the curve.  A positive number indicates that we are on the right side of the lane center nad a negative number indicates that we are on the left side of the center.
 
-#### Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
+#### Here are the results of the lane being correctly detected
 
-![alt text][image6]
-
----
-
-### Pipeline (video)
-
-#### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
-
-Here's a [link to my video result](./project_video.mp4)
+![alt text][test1endresults]
 
 ---
 
-### Discussion
+## Pipeline (video)
 
-#### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
+Here's a [link to my video result](./project_video_output.mp4)
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+---
+
+## Discussion
+
+####  Discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
+
+Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.
+
+I noticed that the program can sometimes take a while when calculating gradients.  Another approach could ignore gradients and excusively use the hls and rgb color channels for white and yellow lines.  This would speed up the computations.  
