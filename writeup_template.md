@@ -1,7 +1,4 @@
 ## Writeup Template
-
-### You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
 ---
 
 **Advanced Lane Finding Project**
@@ -27,6 +24,17 @@ The goals / steps of this project are the following:
 [image6]: ./examples/example_output.jpg "Output"
 [video1]: ./project_video.mp4 "Video"
 
+
+[test1]: ./examples/test_1.png "Test image"
+[test1undistort]: ./examples/test_1_undistort.png "Test image undistorted"
+[test1absbinary]: ./examples/test_1_abs_binary.png "Test image abs grad in x"
+[test1dirbinary]: ./examples/test_1_dir_binary.png "Test image direction grad"
+[test1magbinary]: ./examples/test_1_mag_binary.png "Test image magnitude grad"
+[test1sbinary]: ./examples/test_1_s_binary.png "Test image s channel"
+[test1combinedbinary]: ./examples/test_1_combined_binary.png "Test image combined binary"
+
+[test1warped]: ./examples/test_1_warped.png "Perspective transformed image"
+
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 
 ### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
@@ -43,7 +51,7 @@ You're reading it!
 
 #### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
 
-The code for this step is contained in the first code cell of the IPython notebook located in "./examples/example.ipynb" (or in lines # through # of the file called `some_file.py`).  
+The code for this step is contained in the first code cell of the IPython notebook located in "lane_lines.ipynb"
 
 I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  
 
@@ -53,44 +61,46 @@ I then used the output `objpoints` and `imgpoints` to compute the camera calibra
 
 ### Pipeline (single images)
 
-#### 1. Provide an example of a distortion-corrected image.
+I decided to use a combination of gradients and color transforms to achieve a threshold binary image.  I used the direction gradient, the magnitude gradient, the absolute x gradient, and the s channel in the hls color space.
 
-To demonstrate this step, I will describe how I apply the distortion correction to one of the test images like this one:
-![alt text][image2]
+#### Original Image
+![alt text][test1] 
 
-#### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
+#### After a distortion correction
+![alt text][test1undistort]
 
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
+### Here we will display the following color transforms and gradient binary images.
 
-![alt text][image3]
+#### Absolute gradient in x
+![alt text][test1absbinary]
 
-#### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
+#### Direction gradient
+![alt text][test1dirbinary]
+
+#### Magnitude gradient
+![alt text][test1magbinary]
+
+#### S channel
+![alt text][test1sbinary]
+
+### And finally, here is the combined binary image
+![alt text][test1combinedbinary]
+
+#### Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
 The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
 
 ```python
-src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
-    [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
-dst = np.float32(
-    [[(img_size[0] / 4), 0],
-    [(img_size[0] / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
+    # Points were found on the Udacity Slack Channel by Chris Grill
+    src = np.float32([[220, 719], [1220, 719], [750, 480], [550, 480]])
+    dest = np.float32([[240, 719], [1040, 719], [1040, 300], [240, 300]])
 ```
+#### Original
+![alt text][test1]
 
-This resulted in the following source and destination points:
+#### Here is the image after the perspective transform
+![alt text][test1warped]
 
-| Source        | Destination   | 
-|:-------------:|:-------------:| 
-| 585, 460      | 320, 0        | 
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
-
-I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
 
 ![alt text][image4]
 
