@@ -127,11 +127,25 @@ One of these methods makes use of a histogram.  We use a histogram to determine 
 
 #### Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in lines # through # in my code in `my_other_file.py`
+The code for calculating curvatures is in a function called calculate_curvatures under the section "Calculating left and right curvatures" in the lane_lines.ipynb
+The code was essentially provided by Udacity, but I will briefly discuss the calculations.  The function takes in 
+the equation of the lane lines and the lane pixel indices.
 
-#### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
+We have polynomials that fit a line, which are in the form f(y) = Ay^2 + By + C
+The equation for radius of curvature requires taking the derivative and second derivative of f(y).
 
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
+f'(y) = 2Ay + B 
+
+f''(y) = 2A
+
+R_curve = (1 + (2Ay + B)^2)^(3/2) / abs(2A)
+
+
+Under the same section, you will see `distance_from_lane_center(img, left_fit, right_fit)` which will return the position of the vehicle with respect to the center.
+
+For this, we use the center of the image as our camera position, and we want to find out the distance from our camera position to the center of the lane.  The center of the lane is the midpoint of the two lane lines at the very bottom of the curve.  A positive number indicates that we are on the right side of the lane center nad a negative number indicates that we are on the left side of the center.
+
+#### Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
 ![alt text][image6]
 
