@@ -34,6 +34,9 @@ The goals / steps of this project are the following:
 [test1combinedbinary]: ./examples/test_1_combined_binary.png "Test image combined binary"
 
 [test1warped]: ./examples/test_1_warped.png "Perspective transformed image"
+[test1processed]: ./examples/test_1_processed.png "Image after pipeline"
+[test1histogram]: ./examples/test_1_histogram.png "Histogram for line lane finding"
+[test1lanesdetected]: ./examples/test_1_lanes_detected.png "Left and right lanes found"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 
@@ -60,6 +63,11 @@ I then used the output `objpoints` and `imgpoints` to compute the camera calibra
 ![alt text][image1]
 
 ### Pipeline (single images)
+
+The entire pipeline consists of the following:
+	- correcting a distorted image
+	- performing binary thresholding
+	- perspective transform
 
 I decided to use a combination of gradients and color transforms to achieve a threshold binary image.  I used the direction gradient, the magnitude gradient, the absolute x gradient, and the s channel in the hls color space.
 
@@ -102,15 +110,22 @@ The code for my perspective transform includes a function called `warper()`, whi
 ![alt text][test1warped]
 
 
-![alt text][image4]
+#### Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
-#### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
+#### Here is the image after the entire pipeline
+![alt text][test1processed]
 
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
+At this point, we want to determine the pixels that make up the left and right line lanes.  After that we also want to fit a curve to these lines.
 
-![alt text][image5]
+One of these methods makes use of a histogram.  We use a histogram to determine the peaks on the left and right side of the midpoint.  We then use a sliding window to get all the points.  This can all be seen under the fit_lines(img, histogram) function under "Detecting the left and right lanes" in the lane_lines.ipynb
 
-#### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
+#### Histogram of peaks
+![alt text][test1histogram]
+
+#### Visual of the lines and identified pixels
+![alt text][test1lanesdetected]
+
+#### Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
 I did this in lines # through # in my code in `my_other_file.py`
 
