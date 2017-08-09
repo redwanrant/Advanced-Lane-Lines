@@ -156,6 +156,4 @@ Here's a [link to my video result](./project_video_output.mp4)
 
 ####  Discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.
-
-I noticed that the program can sometimes take a while when calculating gradients.  Another approach could ignore gradients and excusively use the hls and rgb color channels for white and yellow lines.  This would speed up the computations.  
+After going through the challenge video, it seems that the barrier in the middle can be picked up as another line.  It also has problems with cracks in the road as it seems to prefer the crack over the dashed lines.  To make the pipeline more robust, we could add a deep learning approach for detecting lane lines.  If the convolutional network we implement is trained correctly, then this would ensure that only lane lines get picked up. 
